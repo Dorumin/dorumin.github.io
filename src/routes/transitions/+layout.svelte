@@ -1,4 +1,4 @@
-<script context="module">
+<script lang="ts" context="module">
     import { writable } from "svelte/store";
 
     const moving = writable(0);

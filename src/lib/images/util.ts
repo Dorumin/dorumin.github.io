@@ -1,5 +1,5 @@
 export function copyText(text: string) {
-    var textArea = document.createElement("textarea");
+    const textArea = document.createElement("textarea");
 
     // Place in the top-left corner of screen regardless of scroll position.
     textArea.style.position = 'fixed';
@@ -30,10 +30,10 @@ export function copyText(text: string) {
     textArea.select();
 
     try {
-      var successful = document.execCommand('copy');
-      var msg = successful ? 'successful' : 'unsuccessful';
+      const successful = document.execCommand('copy');
+      const msg = successful ? 'successful' : 'unsuccessful';
       console.log('Copying text command was ' + msg);
-    } catch (err) {
+    } catch (_err) {
       console.log('Oops, unable to copy');
     }
 

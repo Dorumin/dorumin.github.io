@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, type ComponentType } from "svelte";
 
     export let itemCount: number;
-    export let component: ConstructorOfATypedSvelteComponent;
+    export let component: ComponentType;
 
     const dispatch = createEventDispatcher<{ scroll: UIEvent }>();
 

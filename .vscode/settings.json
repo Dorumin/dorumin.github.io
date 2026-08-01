@@ -1,8 +1,15 @@
 {
-    "search.exclude": {
-        "**/node_modules": false,
-        "**/node_modulesx": true
+    "eslint.validate": [
+        "svelte"
+    ],
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true,
+    "eslint.workingDirectories": [],
+    "svelte.plugin.svelte.compilerWarnings": {
+        "css-unused-selector": "ignore",
     },
-    "search.useIgnoreFiles": true,
-    "search.useGlobalIgnoreFiles": false
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    }
 }

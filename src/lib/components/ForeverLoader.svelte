@@ -24,7 +24,7 @@
         'SpinnerOnly',
     ];
 
-    export let onLoaded: () => {};
+    export let onLoaded: () => void;
 
     let animationState: AnimationState | null = null;
 

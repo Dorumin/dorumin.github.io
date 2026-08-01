@@ -43,7 +43,7 @@
     </table>
 </div>
 
-<VirtualizedList itemCount={400} component={ListItem} on:wheel={onWheel} on:scroll={e => e.detail}/>
+<VirtualizedList itemCount={400} component={ListItem} on:wheel={onWheel} on:scroll={e => e.detail} />
 
 <style>
     .scrolling-events {
