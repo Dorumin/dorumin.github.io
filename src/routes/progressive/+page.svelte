@@ -60,6 +60,39 @@
             console.error(err);
         }
     }
+
+    async function onFileChange(e: Event) {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        await loadBlob(file);
+    }
+
+    function onImageLoad(e: Event) {
+            console.log('loaded');
+
+            if (!fixStaleProgressiveRenders) return;
+
+            const img = e.currentTarget as HTMLElement;
+            const src = img.getAttribute('src');
+
+            let i = 0;
+            const MAX_FLICKS = 2;
+
+            function queue() {
+                if (img.getAttribute('src') !== src) return;
+
+                img.style.filter = i % 2 ? 'brightness(1)' : '';
+
+                i++;
+
+                if (i > MAX_FLICKS) return;
+
+                requestAnimationFrame(queue);
+            }
+
+            queue();
+    }
 </script>
 
 <div class="controls">
@@ -70,12 +103,7 @@
             id="file"
             type="file"
             accept="image/*"
-            onchange={async (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (!file) return;
-
-                await loadBlob(file);
-            }}
+            onchange={onFileChange}
         />
     </label>
 
@@ -114,31 +142,7 @@
         alt="can I have more bytes, please?"
         title="Click to expand"
         onclick={() => expand = !expand}
-        onload={(e) => {
-            console.log('loaded');
-
-            if (!fixStaleProgressiveRenders) return;
-
-            const img = e.currentTarget as HTMLElement;
-            const src = img.getAttribute('src');
-
-            let i = 0;
-            const MAX_FLICKS = 2;
-
-            function queue() {
-                if (img.getAttribute('src') !== src) return;
-
-                img.style.filter = i % 2 ? 'brightness(1)' : '';
-
-                i++;
-
-                if (i > MAX_FLICKS) return;
-
-                requestAnimationFrame(queue);
-            }
-
-            queue();
-        }}
+        onload={onImageLoad}
     />
 {/if}
 
