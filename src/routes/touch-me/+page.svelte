@@ -5,16 +5,16 @@
     let touches: Record<number, Touch> = $state({});
     let lastChange: Touch[] = $state([]);
 
-    onMount(() => {
+    $effect(() => {
         window.addEventListener('touchstart', onTouchStart, { passive: false });
         window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onTouchEnd, { passive: false });
-    });
 
-    onDestroy(() => {
-        window.removeEventListener('touchstart', onTouchStart);
-        window.removeEventListener('touchmove', onTouchMove);
-        window.removeEventListener('touchend', onTouchEnd);
+        return () => {
+            window.removeEventListener('touchstart', onTouchStart);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', onTouchEnd);
+        };
     });
 
     function onTouchStart(e: TouchEvent) {
