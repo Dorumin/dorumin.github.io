@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>Under construction</title>
-	<meta name="description" content="Please do not disturb" />
+    <title>Under construction</title>
+    <meta name="description" content="Please do not disturb" />
 </svelte:head>
 
 <section class="placeholder">
