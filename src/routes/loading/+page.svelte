@@ -6,7 +6,7 @@
 
 <div class="loading-page">
     {#if !loaded}
-        <ForeverLoader onLoaded={() => loaded = true}/>
+        <ForeverLoader onLoaded={() => loaded = true} />
     {:else}
         <div class="loaded-content">
             Loaded!
@@ -14,7 +14,7 @@
     {/if}
 </div>
 
-<style>
+<style lang="scss">
     .loading-page {
         display: flex;
         align-items: center;

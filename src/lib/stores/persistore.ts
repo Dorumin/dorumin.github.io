@@ -1,5 +1,5 @@
-import { browser } from "$app/environment";
-import { writable, type Subscriber, type Unsubscriber, type Updater, type Writable, type StartStopNotifier, get } from "svelte/store";
+import { browser } from '$app/environment';
+import { writable, type Subscriber, type Unsubscriber, type Updater, type Writable, type StartStopNotifier, get } from 'svelte/store';
 
 type StoreContract<T> = {
     subscribe(this: void, run: Subscriber<T>): Unsubscriber;
@@ -7,7 +7,7 @@ type StoreContract<T> = {
     update(this: void, updater: Updater<T>): void;
 
     init: StartStopNotifier<T>;
-}
+};
 
 export function proxyStore<T>(initialValue: T, init: (source: Writable<T>) => StoreContract<T>) {
     const source = writable<T>(initialValue, (...args) => {
@@ -17,12 +17,12 @@ export function proxyStore<T>(initialValue: T, init: (source: Writable<T>) => St
 
     return {
         ...source,
-        ...methods
+        ...methods,
     };
 }
 
 export const localStorageBacked = function<T>(key: string, initial: T) {
-    return proxyStore(initial, source => {
+    return proxyStore(initial, (source) => {
         return {
             set(newValue) {
                 if (browser) { localStorage.setItem(key, JSON.stringify(newValue)); }
@@ -32,18 +32,18 @@ export const localStorageBacked = function<T>(key: string, initial: T) {
                 if (browser) { localStorage.setItem(key, JSON.stringify(source)); }
                 return source.update(updater);
             },
-            subscribe: (callback) => source.subscribe(callback),
+            subscribe: callback => source.subscribe(callback),
             init: (set) => {
                 if (!browser) return;
 
-                let stored = localStorage.getItem(key);
+                const stored = localStorage.getItem(key);
 
                 if (stored === null) {
                     set(initial);
                 } else {
                     set(JSON.parse(stored));
                 }
-            }
+            },
         };
     });
 };
@@ -60,7 +60,7 @@ export const localStorageCentralized = function<T>(localKey: string, initial: T)
 
     data[localKey] = initial;
 
-    return proxyStore(initial, source => {
+    return proxyStore(initial, (source) => {
         return {
             set(newValue) {
                 data[localKey] = newValue;
@@ -72,10 +72,10 @@ export const localStorageCentralized = function<T>(localKey: string, initial: T)
                 if (browser) { localStorage.setItem(centralizedKey, JSON.stringify(data)); }
                 return source.update(updater);
             },
-            subscribe: (callback) => source.subscribe(callback),
+            subscribe: callback => source.subscribe(callback),
             init: (set) => {
                 set(data[localKey]);
-            }
+            },
         };
     });
 };

@@ -22,5 +22,5 @@
 </script>
 
 {#if installPrompt}
-    <button onclick={install}>install me install me install me install me install me</button>
+    <button type="button" onclick={install}>install me install me install me install me install me</button>
 {/if}

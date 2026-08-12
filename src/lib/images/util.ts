@@ -1,5 +1,5 @@
 export function copyText(text: string) {
-    const textArea = document.createElement("textarea");
+    const textArea = document.createElement('textarea');
 
     // Place in the top-left corner of screen regardless of scroll position.
     textArea.style.position = 'fixed';
@@ -22,7 +22,6 @@ export function copyText(text: string) {
     // Avoid flash of the white box if rendered for any reason.
     textArea.style.background = 'transparent';
 
-
     textArea.value = text;
 
     document.body.appendChild(textArea);
@@ -30,11 +29,11 @@ export function copyText(text: string) {
     textArea.select();
 
     try {
-      const successful = document.execCommand('copy');
-      const msg = successful ? 'successful' : 'unsuccessful';
-      console.log('Copying text command was ' + msg);
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Copying text command was ' + msg);
     } catch (_err) {
-      console.log('Oops, unable to copy');
+        console.log('Oops, unable to copy');
     }
 
     document.body.removeChild(textArea);

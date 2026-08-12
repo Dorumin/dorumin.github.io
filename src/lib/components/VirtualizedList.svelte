@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher, type ComponentType } from "svelte";
+    import { createEventDispatcher, type ComponentType } from 'svelte';
 
     export let itemCount: number;
     export let component: ComponentType;
@@ -12,10 +12,10 @@
     }
 </script>
 
-<ul class='virtualized-list' on:scroll={localOnScroll} on:wheel>
-    <div class='virtual-padding top-padding' />
-    {#each { length: itemCount } as _, index}
-        <svelte:component this={component} index={index} />
+<ul class="virtualized-list" on:scroll={localOnScroll} on:wheel>
+    <div class="virtual-padding top-padding"></div>
+    {#each { length: itemCount } as _, index (index)}
+        <svelte:component this={component} {index} />
     {/each}
-    <div class='virtual-padding bottom-padding' />
+    <div class="virtual-padding bottom-padding"></div>
 </ul>

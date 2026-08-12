@@ -1,41 +1,110 @@
 <script lang="ts">
+    import { deleteImage, putImage } from '$lib/progressive/idb';
+
+    const IMG_ENDPOINT = '/progressive/img';
+
+    type LoadingMode = 'blob' | 'network';
+
     let urlValue = $state('');
     let sliderBytes = $state(1);
     let sliderMax = $state(1);
     let statusMessage = $state('No image loaded.');
     let fixStaleProgressiveRenders = $state(true);
     let expand = $state(false);
+    let loadingMode = $state('blob' as LoadingMode);
 
     let sourceBlob = $state(null as Blob | null);
-    let currentObjectURL = $state(null as string | null);
+    let currentSrc = $state(null as string | null);
+    let objectUrlActive = $state(false);
+    let activeBlobId = $state(null as string | null);
 
-    function revokeCurrentURL() {
-        if (currentObjectURL) {
-            URL.revokeObjectURL(currentObjectURL);
-            currentObjectURL = null;
+    let storeMemo: Promise<void> | null = null;
+
+    function revokeObjectUrl() {
+        if (objectUrlActive && currentSrc) {
+            URL.revokeObjectURL(currentSrc);
+            objectUrlActive = false;
         }
     }
 
-    function updateImage() {
+    function setStatus(length: number, blob: Blob) {
+        const percent = Math.round(length / blob.size * 100);
+        const source = loadingMode === 'network' ? ' · via service worker' : '';
+        statusMessage = `Bytes: ${length} / ${blob.size} (${percent}%)${source}`;
+    }
+
+    async function ensureServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            throw new Error('Service workers are not supported in this browser.');
+        }
+
+        await navigator.serviceWorker.register('/service-worker.js', {
+            type: 'module',
+        });
+        await navigator.serviceWorker.ready;
+    }
+
+    function storeCurrentBlob() {
+        if (!sourceBlob || !activeBlobId) return Promise.resolve();
+
+        if (!storeMemo) {
+            storeMemo = (async () => {
+                await ensureServiceWorker();
+                await putImage(activeBlobId, sourceBlob);
+            })().finally(() => {
+                storeMemo = null;
+            });
+        }
+
+        return storeMemo;
+    }
+
+    async function updateImage() {
         if (!sourceBlob) return;
 
-        revokeCurrentURL();
-
         const length = sliderBytes;
-        const partialBlob = sourceBlob.slice(0, length, sourceBlob.type);
 
-        currentObjectURL = URL.createObjectURL(partialBlob);
+        if (loadingMode === 'blob') {
+            revokeObjectUrl();
+            const partialBlob = sourceBlob.slice(0, length, sourceBlob.type);
+            currentSrc = URL.createObjectURL(partialBlob);
+            objectUrlActive = true;
+            setStatus(length, sourceBlob);
+        } else {
+            const id = activeBlobId;
+            if (!id) return;
 
-        statusMessage = `Bytes: ${length} / ${sourceBlob.size} (${Math.round(length / sourceBlob.size * 100)}%)`;
+            try {
+                await storeCurrentBlob();
+                revokeObjectUrl();
+                currentSrc = `${IMG_ENDPOINT}?id=${id}&length=${length}`;
+                setStatus(length, sourceBlob);
+            } catch (err) {
+                console.log(err);
+                console.error(err);
+                statusMessage = `Failure. ${err}`;
+            }
+        }
+    }
+
+    function onModeChange() {
+        if (!sourceBlob) return;
+        void updateImage();
     }
 
     async function loadBlob(blob: Blob) {
+        if (activeBlobId) {
+            void deleteImage(activeBlobId);
+        }
+
         sourceBlob = blob;
+        activeBlobId = crypto.randomUUID();
+        storeMemo = null;
 
         sliderMax = blob.size;
         sliderBytes = blob.size;
 
-        updateImage();
+        await updateImage();
     }
 
     async function onLoadClick() {
@@ -69,29 +138,29 @@
     }
 
     function onImageLoad(e: Event) {
-            console.log('loaded');
+        console.log('loaded');
 
-            if (!fixStaleProgressiveRenders) return;
+        if (!fixStaleProgressiveRenders) return;
 
-            const img = e.currentTarget as HTMLElement;
-            const src = img.getAttribute('src');
+        const img = e.currentTarget as HTMLElement;
+        const src = img.getAttribute('src');
 
-            let i = 0;
-            const MAX_FLICKS = 2;
+        let i = 0;
+        const MAX_FLICKS = 2;
 
-            function queue() {
-                if (img.getAttribute('src') !== src) return;
+        function queue() {
+            if (img.getAttribute('src') !== src) return;
 
-                img.style.filter = i % 2 ? 'brightness(1)' : '';
+            img.style.filter = i % 2 ? 'brightness(1)' : '';
 
-                i++;
+            i++;
 
-                if (i > MAX_FLICKS) return;
+            if (i > MAX_FLICKS) return;
 
-                requestAnimationFrame(queue);
-            }
+            requestAnimationFrame(queue);
+        }
 
-            queue();
+        queue();
     }
 </script>
 
@@ -119,6 +188,30 @@
         <input type="checkbox" bind:checked={fixStaleProgressiveRenders} />
     </label>
 
+    <div class="modes">
+        Loading mode
+        <label title="Slice the blob in memory and show it instantly, no network involved">
+            <input
+                type="radio"
+                name="mode"
+                value="blob"
+                bind:group={loadingMode}
+                onchange={onModeChange}
+            />
+            Blob slice
+        </label>
+        <label title="Serve the partial bytes through a service worker that never finishes, emulating a forever network delay.\n\nThis is useful for formats that don't progressively decode when fully loaded, such as webp or avif.">
+            <input
+                type="radio"
+                name="mode"
+                value="network"
+                bind:group={loadingMode}
+                onchange={onModeChange}
+            />
+            Service worker
+        </label>
+    </div>
+
     <div id="status">{statusMessage}</div>
 
     <input
@@ -134,19 +227,33 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-{#if currentObjectURL}
-    <img
-        id="img"
-        class:expanded={expand}
-        src={currentObjectURL}
-        alt="can I have more bytes, please?"
-        title="Click to expand"
-        onclick={() => expand = !expand}
-        onload={onImageLoad}
-    />
+{#if currentSrc}
+    {#key (loadingMode === 'blob' ? 'blob' : currentSrc)}
+        <img
+            id="img"
+            class:expanded={expand}
+            src={currentSrc}
+            alt="can I have more bytes, please?"
+            title="Click to expand"
+            onclick={() => expand = !expand}
+            onload={onImageLoad}
+        />
+    {/key}
 {/if}
 
 <style lang="scss">
+    .modes {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .modes label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
     img {
         max-height: 100vh;
         max-width: 100vw;

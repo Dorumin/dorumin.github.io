@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { ComponentType, SvelteComponentTyped } from "svelte";
+    import type { ComponentType, SvelteComponentTyped } from 'svelte';
 
     type FlowVariants = 'vertical' | 'horizontal';
     type ChildComponentProps = {
-        index: number
+        index: number;
     };
 
     export let flow: FlowVariants = 'vertical';
@@ -37,8 +37,8 @@ Remaining: {remainingAbnormalItems}
 
 <div
     class="micro-gallery-container"
-    style:height={height}
-    style:width={width}
+    style:height
+    style:width
 >
     {#each { length: Math.max(count, 0) } as _, index (index)}
         {@const isFillItem = index >= normalLayoutCount}
@@ -56,8 +56,8 @@ Remaining: {remainingAbnormalItems}
         <div
             class="micro-gallery-item"
             class:fill-item={isFillItem}
-            style:height='{height}%'
-            style:width='{width}%'
+            style:height="{height}%"
+            style:width="{width}%"
         >
             {minStretch.toFixed(0)} {maxStretch.toFixed(0)}
             <!-- <svelte:component this={component} index={index} /> -->
@@ -65,7 +65,7 @@ Remaining: {remainingAbnormalItems}
     {/each}
 </div>
 
-<style>
+<style lang="scss">
     .micro-gallery-container {
         height: 360px;
         width: 240px;

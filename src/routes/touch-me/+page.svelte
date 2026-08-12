@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
-
     const colors = ['red', 'blue', 'green', 'yellow', 'magenta', 'orange', 'purple'];
     let touches: Record<number, Touch> = $state({});
     let lastChange: Touch[] = $state([]);

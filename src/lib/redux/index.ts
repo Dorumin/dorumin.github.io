@@ -6,7 +6,7 @@ import { derived, type Readable } from 'svelte/store';
 const root = configureStore({
     reducer: combineReducers({
         counter,
-        todos
+        todos,
     }),
 });
 

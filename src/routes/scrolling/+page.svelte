@@ -1,13 +1,13 @@
 <script lang="ts">
     // @hmr:keep-all
 
-    import VirtualizedList from "$lib/components/VirtualizedList.svelte";
+    import VirtualizedList from '$lib/components/VirtualizedList.svelte';
     import ListItem from './ListItem.svelte';
 
     type ScrollEvent = {
         direction: 'up' | 'down';
         count: number;
-        pixels: number
+        pixels: number;
     };
 
     let scrollEvents: ScrollEvent[] = [];
@@ -21,7 +21,7 @@
             scrollEvents.unshift({
                 direction,
                 count: 1,
-                pixels: Math.abs(e.deltaY)
+                pixels: Math.abs(e.deltaY),
             });
             scrollEvents = scrollEvents;
         } else {
@@ -33,19 +33,22 @@
 
 <div class="scrolling-events">
     <table class="scroll-events-table">
-        {#each scrollEvents as scrollEvent}
-            <tr class="scroll-event">
-                <td class="direction">{scrollEvent.direction}</td>
-                <td class="count">{scrollEvent.count}x</td>
-                <td class="pixels">{scrollEvent.pixels}px</td>
-            </tr>
-        {/each}
+        <tbody>
+
+            {#each scrollEvents as scrollEvent, index (index)}
+                <tr class="scroll-event">
+                    <td class="direction">{scrollEvent.direction}</td>
+                    <td class="count">{scrollEvent.count}x</td>
+                    <td class="pixels">{scrollEvent.pixels}px</td>
+                </tr>
+            {/each}
+        </tbody>
     </table>
 </div>
 
 <VirtualizedList itemCount={400} component={ListItem} on:wheel={onWheel} on:scroll={e => e.detail} />
 
-<style>
+<style lang="scss">
     .scrolling-events {
         position: absolute;
         top: 0;

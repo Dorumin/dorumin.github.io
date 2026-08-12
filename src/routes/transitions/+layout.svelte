@@ -1,17 +1,17 @@
 <script lang="ts" context="module">
-    import { writable } from "svelte/store";
+    import { writable } from 'svelte/store';
 
     const moving = writable(0);
 </script>
 
 <script lang="ts">
-    import { onNavigate } from "$app/navigation";
+    import { onNavigate } from '$app/navigation';
 
     onNavigate(() => {
         console.log('set to 1');
         moving.set(1);
 
-        return new Promise(res => {
+        return new Promise((res) => {
             setTimeout(() => {
                 res();
                 moving.set(0);
@@ -28,12 +28,12 @@
         moving: {$moving}
     </div>
 
-    <slot />
+    <slot></slot>
 
     <div class="transition-spinner" style:opacity={$moving}>spin</div>
 </div>
 
-<style>
+<style lang="scss">
     .transition-spinner {
         opacity: 0;
         position: fixed;

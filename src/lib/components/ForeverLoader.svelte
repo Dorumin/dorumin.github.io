@@ -39,7 +39,7 @@
             nextStepDuration: getStepDuration(),
             nextStepProgress: getStepProgress(),
             timeoutId: animationState?.timeoutId ?? -1,
-            progress: 0
+            progress: 0,
         };
     }
 
@@ -111,7 +111,7 @@
     </div>
 </div>
 
-<style>
+<style lang="scss">
 .loading-spinner {
     display: flex;
     align-items: center;
